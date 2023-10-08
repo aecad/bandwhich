@@ -42,7 +42,7 @@ netstat2 = "0.9.1"
 sysinfo = "0.29.10"
 
 [target.'cfg(target_os="linux")'.dependencies]
-procfs = "0.15.1"
+procfs = { git = "https://github.com/eminence/procfs.git", branch = "master" }
 
 [dev-dependencies]
 insta = "1.33.0"
