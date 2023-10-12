@@ -50,23 +50,13 @@ jobs:
     strategy:
       matrix:
         build:
-          - linux-x64-gnu
-          - linux-x64-musl
-          - macos-x64
-          - windows-x64-msvc
+          - linux-arm-musleabihf
         include:
-          - build: linux-x64-gnu
+          - build: linux-arm-musleabihf
             os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - build: linux-x64-musl
-            os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-          - build: macos-x64
-            os: macos-latest
-            target: x86_64-apple-darwin
-          - build: windows-x64-msvc
-            os: windows-latest
-            target: x86_64-pc-windows-msvc
+            target: armv7-unknown-linux-musleabihf
+
+
 
     steps:
       - name: Checkout repository
@@ -78,12 +68,15 @@ jobs:
           toolchain: stable
           targets: ${{ matrix.target }}
 
+      - name: Install cross-tools
+        run: cargo install cross
+
       - name: Install musl-tools
         if: matrix.target == 'x86_64-unknown-linux-musl'
         run: sudo apt-get install -y --no-install-recommends musl-tools
 
       - name: Build release binary
-        run: cargo build --verbose --release --target ${{ matrix.target }}
+        run: cross build --target armv7-unknown-linux-musleabihf
 
       - name: Strip release binary (unix)
         if: matrix.os != 'windows-latest'
@@ -93,11 +86,6 @@ jobs:
         if: matrix.os != 'windows-latest'
         working-directory: ./target/${{ matrix.target }}/release
         run: tar cvfz bandwhich-${{ github.ref_name }}-${{matrix.target}}.tar.gz "bandwhich"
-
-      - name: Zip Windows release
-        if: matrix.os == 'windows-latest'
-        working-directory: ./target/${{ matrix.target }}/release
-        run: tar.exe -a -c -f bandwhich-${{ github.ref_name }}-${{matrix.target}}.zip "bandwhich.exe"
 
       - name: Upload release archive (unix)
         if: matrix.os != 'windows-latest'
@@ -110,13 +98,4 @@ jobs:
           asset_name: bandwhich-${{ github.ref_name }}-${{matrix.target}}.tar.gz
           asset_content_type: application/octet-stream
 
-      - name: Upload Windows release archive
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./target/${{ matrix.target }}/release/bandwhich-${{ github.ref_name }}-${{matrix.target}}.zip
-          asset_name: bandwhich-${{ github.ref_name }}-${{matrix.target}}.zip
-          asset_content_type: application/octet-stream
+
