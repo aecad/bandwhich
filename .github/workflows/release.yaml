@@ -80,11 +80,11 @@ jobs:
 
       - name: Strip release binary (unix)
         if: matrix.os != 'windows-latest'
-        run: strip "target/${{ matrix.target }}/release/bandwhich"
+        run: strip "target/${{ matrix.target }}/debug/bandwhich"
 
       - name: Tar release (unix)
         if: matrix.os != 'windows-latest'
-        working-directory: ./target/${{ matrix.target }}/release
+        working-directory: ./target/${{ matrix.target }}/debug
         run: tar cvfz bandwhich-${{ github.ref_name }}-${{matrix.target}}.tar.gz "bandwhich"
 
       - name: Upload release archive (unix)
@@ -94,7 +94,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./target/${{ matrix.target }}/release/bandwhich-${{ github.ref_name }}-${{matrix.target}}.tar.gz
+          asset_path: ./target/${{ matrix.target }}/debug/bandwhich-${{ github.ref_name }}-${{matrix.target}}.tar.gz
           asset_name: bandwhich-${{ github.ref_name }}-${{matrix.target}}.tar.gz
           asset_content_type: application/octet-stream
 
