@@ -78,9 +78,6 @@ jobs:
       - name: Build release binary
         run: cross build --target armv7-unknown-linux-musleabihf
 
-      - name: Strip release binary (unix)
-        if: matrix.os != 'windows-latest'
-        run: strip "target/${{ matrix.target }}/debug/bandwhich"
 
       - name: Tar release (unix)
         if: matrix.os != 'windows-latest'
